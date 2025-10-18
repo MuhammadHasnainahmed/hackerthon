@@ -1,24 +1,19 @@
 import React, { useState } from "react";
+import genAI from "../../gemini";
+console.log(genAI);
+
 function Propmtpage() {
- 
-    const [propmt, setPrompt] = useState("")
+  const [prompt, setPrompt] = useState("");
 
-    const handlechange = (e) => {
-        const { name, value } = e.target;
-        setPrompt((prev) => ({
-          ...prev,
-          [name]: value,
-        }));
-    }
-  
-    const handlesubmit = (e) => {
-        e.preventDefault();
-        console.log(propmt)
+  const handleChange = (e) => {
+    setPrompt(e.target.value);
+  };
 
-
-        setPrompt('')
-    }
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(prompt);
+    setPrompt(""); // clear input
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6">
@@ -35,15 +30,14 @@ function Propmtpage() {
 
       {/* Input Form */}
       <form
-        onSubmit={handlesubmit}
-        action=""
+        onSubmit={handleSubmit}
         className="flex w-full max-w-2xl bg-white shadow-md rounded-full p-2 border border-gray-200"
       >
         <input
           type="text"
           placeholder="Enter your prompt..."
-          name="prompt"
-          onChange={handlechange}
+          value={prompt}
+          onChange={handleChange}
           className="flex-1 px-4 py-2 rounded-full outline-none text-gray-700"
         />
         <button
@@ -55,10 +49,8 @@ function Propmtpage() {
       </form>
 
       {/* Footer */}
-      <p className="text-gray-400 text-sm mt-8">
-        Powered by PitchCraft AI 💡
-      </p>
-    </div>
+      <p className="text-gray-400 text-sm mt-8">Powered by PitchCraft AI 💡</p>
+    </div>  
   );
 }
 
