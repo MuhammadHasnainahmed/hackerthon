@@ -39,30 +39,9 @@ console.log(user);
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center">
-          <Link to="/" className="hover:text-gray-200 transition">
-            Home
-          </Link>
-          <Link to="/about" className="hover:text-gray-200 transition">
-            About
-          </Link>
+        
           
-         {user ? (
-            <>
-              <Link to="/dashboard" className="px-4 py-1 border border-white rounded-md hover:bg-white hover:text-blue-600 transition ">
-                Dashboard
-              </Link>
-              <button
-                onClick={async ()=>{
-                    const { error } = await supabase.auth.signOut()
-                    if (!error) setUser(null)
-                    navigate('/')
-                }}
-                className="px-4 py-1 bg-white text-blue-600 rounded-md hover:bg-gray-200 transition"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
+      
             <div className="flex gap-3">
               <Link
                 to="/login"
@@ -77,7 +56,7 @@ console.log(user);
                 Signup
               </Link>
             </div>
-          )}
+        
         </div>
 
         {/* Mobile Menu Button */}

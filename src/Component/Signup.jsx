@@ -146,7 +146,7 @@ function Signup() {
               <p className="text-center text-sm text-gray-600 mt-4">
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  to="/"
                   className="text-indigo-600 font-medium hover:underline"
                 >
                   login

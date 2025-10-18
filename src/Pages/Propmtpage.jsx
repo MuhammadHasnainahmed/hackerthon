@@ -1,8 +1,24 @@
-import React from "react";
-
+import React, { useState } from "react";
 function Propmtpage() {
  
-    
+    const [propmt, setPrompt] = useState("")
+
+    const handlechange = (e) => {
+        const { name, value } = e.target;
+        setPrompt((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+    }
+  
+    const handlesubmit = (e) => {
+        e.preventDefault();
+        console.log(propmt)
+
+
+        setPrompt('')
+    }
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6">
@@ -19,6 +35,7 @@ function Propmtpage() {
 
       {/* Input Form */}
       <form
+        onSubmit={handlesubmit}
         action=""
         className="flex w-full max-w-2xl bg-white shadow-md rounded-full p-2 border border-gray-200"
       >
@@ -26,6 +43,7 @@ function Propmtpage() {
           type="text"
           placeholder="Enter your prompt..."
           name="prompt"
+          onChange={handlechange}
           className="flex-1 px-4 py-2 rounded-full outline-none text-gray-700"
         />
         <button

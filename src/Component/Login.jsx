@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from "react-hot-toast";
+import Dashboard from '../Pages/Dashboard';
 
 function Login() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ function Login() {
       });
 
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 1000);
     }
   };
