@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSend } from "react-icons/fi";
+import { supabase } from "../../supabase";
 
 const GEMINI_API_KEY = "AIzaSyDJQfZJew5voEHtHK55S89ImkLaqi-0NDc";
 
@@ -17,19 +18,31 @@ export default function PitchCraft() {
     e.preventDefault();
     if (!input.trim()) return;
 
-    // User message
     const userMessage = { sender: "user", text: input };
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
-      const promptText = `You are PitchCraft AI - a personal AI startup partner. 
-Generate a complete startup idea based on the user's input with this EXACT format:
+      const promptText = `You are a startup pitch assistant.
+Generate a startup name, tagline, pitch, target audience, landing page content, brand colors, and logo concept.
+Format response exactly like this:
 
-Startup Name: [creative name]
-Tagline: [catchy tagline] 
-Pitch: [one-line elevator pitch]
+Startup Name: [name]
+Tagline: [tagline]
+Pitch: [2-3 sentence elevator pitch]
+Target Audience: [describe ideal customers]
+Landing Page Content:
+Hero Section: [content]
+Problem Statement: [content]
+Solution: [content]
+Key Features:
+- [feature 1]
+- [feature 2]
+- [feature 3]
+Call to Action: [content]
+Brand Colors: [#hex1, #hex2, #hex3, #hex4, #hex5]
+Logo Concept: [description]
 
 User input: ${input}`;
 
@@ -39,15 +52,8 @@ User input: ${input}`;
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: promptText
-              }]
-            }],
-            generationConfig: {
-              temperature: 0.8,
-              maxOutputTokens: 500,
-            }
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature: 0.8, maxOutputTokens: 500 },
           }),
         }
       );
@@ -58,12 +64,55 @@ User input: ${input}`;
       }
 
       const data = await response.json();
-      
-      // Correct response parsing for generateContent
       const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+
+      console.log("AI Raw Response:", aiText); // ✅ Debug AI response
 
       const botMessage = { sender: "bot", text: aiText };
       setMessages(prev => [...prev, botMessage]);
+
+      // ✅ Correct parsing
+      const parseAIResponse = (text) => {
+        const obj = {};
+        const fields = [
+          "Startup Name",
+          "Tagline",
+          "Pitch",
+          "Target Audience",
+          "Landing Page Content",
+          "Brand Colors",
+          "Logo Concept",
+        ];
+
+        fields.forEach(field => {
+          const regex = new RegExp(`${field}:([\\s\\S]*?)(?=\\n(?:[A-Z][a-zA-Z\\s]+:)|$)`, "i");
+          const match = text.match(regex);
+          obj[field.toLowerCase().replace(/\s/g,'_')] = match ? match[1].trim() : "";
+        });
+
+        return obj;
+      };
+
+      const aiData = parseAIResponse(aiText);
+      console.log("Parsed AI Data:", aiData); // ✅ Debug parsed data
+
+      // ✅ Insert into Supabase
+      const { error } = await supabase.from("startups").insert([
+        {
+          user_input: input,
+          startup_name: aiData.startup_name || "",
+          tagline: aiData.tagline || "",
+          pitch: aiData.pitch || "",
+          target_audience: aiData.target_audience || "",
+          landing_page: aiData.landing_page_content || "",
+          brand_colors: aiData.brand_colors || "",
+          logo_concept: aiData.logo_concept || "",
+        },
+      ]);
+
+      if (error) console.error("Supabase Insert Error:", error);
+      else console.log("Inserted successfully!");
+
     } catch (err) {
       console.error("API Error:", err);
       setMessages(prev => [
@@ -75,7 +124,6 @@ User input: ${input}`;
     }
   }
 
-  // Format bot messages with better styling
   const formatBotMessage = (text) => {
     const lines = text.split('\n');
     return lines.map((line, index) => {
@@ -101,7 +149,6 @@ User input: ${input}`;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Header */}
       <div className="w-full bg-white/80 backdrop-blur-md border-b border-gray-200 py-4 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-indigo-600">PitchCraft AI</h1>
@@ -152,11 +199,10 @@ User input: ${input}`;
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input Box */}
           <form onSubmit={sendMessage} className="flex items-center gap-3 bg-white border-t border-gray-200 p-4">
             <input
               type="text"
-              placeholder="Describe your startup idea... (e.g., I want to build an app that connects students with mentors)"
+              placeholder="Describe your startup idea..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
